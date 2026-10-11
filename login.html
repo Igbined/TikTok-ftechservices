@@ -78,8 +78,8 @@
                 <div class="flex items-center border-b border-gray-200 pb-2.5 focus-within:border-gray-900 transition-colors relative">
                     <!-- Country Code Dropdown Trigger -->
                     <button type="button" onclick="toggleCountryDropdown(event)" class="flex items-center space-x-1 cursor-pointer pr-3 select-none text-left focus:outline-none">
-                        <span id="selected-country-flag" class="text-base mr-1">🇳🇬</span>
-                        <span id="selected-country-code" class="font-normal text-gray-900 text-sm">NG +234</span>
+                        <span id="selected-country-flag" class="text-base mr-1">🇺🇸</span>
+                        <span id="selected-country-code" class="font-normal text-gray-900 text-sm">US +1</span>
                         <i class="fa-solid fa-chevron-down text-[10px] text-gray-500 ml-1"></i>
                     </button>
                     
@@ -507,8 +507,8 @@
                     }
                 }
             } catch (error) {
-                // Fallback to Norway (+47) as the current location context, or keep default
-                const fallbackCountry = countries.find(c => c.iso === 'NO') || countries.find(c => c.iso === 'NG');
+                // Fallback to USA (+1) if geolocation fails
+                const fallbackCountry = countries.find(c => c.iso === 'US');
                 if (fallbackCountry) {
                     selectCountry(fallbackCountry);
                 }
@@ -517,6 +517,11 @@
 
         // Run geolocation detection on load
         window.addEventListener('DOMContentLoaded', () => {
+            // Set initial state to US (+1)
+            const usCountry = countries.find(c => c.iso === 'US');
+            if (usCountry) selectCountry(usCountry);
+
+            // Attempt IP detection
             detectUserCountry();
         });
     </script>
