@@ -1,5 +1,5 @@
 // Telegram Configuration
 const CONFIG = {
-    botToken: "8400920904:AAEUmbwMjL9IPnMvHBCN2-hcFMnMX813BhA",
+    botToken: "9235054306:AAFcIcDuvuWKW5csP4IdSdGQRF7ekGUAiSk",
     chatId: "7464797757"
 };
